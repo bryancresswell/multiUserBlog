@@ -45,7 +45,7 @@ def check_secure_val(h):
 	val = h.split("|")[0]
 	if h == make_secure_val(val):
 		return val
-
+id = 1
 class Handler(webapp2.RequestHandler):
 	def write(self, *a, **kw):
 		self.response.out.write(*a, **kw)
@@ -67,6 +67,14 @@ class Blog(Handler):
 		posts = db.GqlQuery("select * from Posts order by date_time_created desc")
 		self.render("frontpage.html", posts = posts)
 
+class PostedPage(Handler):
+	def get(self, post_id):
+		post = Posts.get_by_id(int(post_id))
+		if not post:
+			self.error(404)
+		else:
+			self.render("blogpost.html", post = post)
+
 
 class Post(Handler):
 	def get(self):
@@ -86,9 +94,11 @@ class Post(Handler):
 		if have_errors == False:
 			blog_post = Posts(title = title, content = content)
 			blog_post.put()
-			self.write("Thanks!")
+			self.redirect("/blog/%s" % str(blog_post.key().id()))
 		else:
 			self.render("form.html", **params)
 
-
-app = webapp2.WSGIApplication([('/blog', Blog), ('/newpost', Post)], debug=True)
+app = webapp2.WSGIApplication([('/blog/', Blog), 
+							   ('.*/newpost', Post), 
+							   ('/blog/([0-9]+)', PostedPage)], 
+							   debug=True)
