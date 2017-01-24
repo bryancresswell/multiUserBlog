@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+	{% for p in posts %}
+		<div class="title">{{p.title}}</div>
+		<div class="date-created">{{p.date_time_created}}</div>
+		<hr>
+		<div class="content">{{p.content}}</div>
+	{% endfor %}
+{% endblock %}
