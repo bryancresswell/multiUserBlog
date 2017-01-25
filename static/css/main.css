@@ -1,0 +1,120 @@
+* {
+	font-family: 'Raleway', sans-serif;
+}
+
+.title {
+	font-weight: 600;
+	float: left;
+}
+
+form {
+    width: 300px;
+    margin: 0 auto;
+}
+
+.login-username {
+    margin-top: 25px;
+    font-weight: 400;
+    text-align: center;
+}
+
+.login-password {
+    font-weight: 400;
+    text-align: center;
+}
+
+.login-submit {
+    text-align: center;
+}
+
+.error-login {
+    text-align: center;
+    font-size: 20px;
+    color: #ff0000;
+    font-weight: 500;
+}
+
+.date-created {
+	font-weight: 300;
+	text-align: right;
+}
+
+.content {
+	font-weight: 400;
+	margin-bottom: 30px;
+}
+
+.blog-title {
+	text-align: center;
+	font-size: 40px;
+	font-weight: 800;
+	margin-bottom: 20px;
+}
+
+.error {
+    font-size: 30px;
+    text-align: right;
+    font-weight: 500;
+    color: red;
+}
+
+.form-content {
+    font-size: 30px;
+    float: left;
+    font-weight: 500;
+    text-decoration: underline;
+}
+
+textarea {
+    width: 100%;
+    height: 200px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 16px;
+    margin-bottom: 25px;
+    margin-top: 25px;
+}
+
+input[type=text] {
+	width: 100%;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 20px;
+       margin-bottom: 25px;
+    margin-top: 25px;
+}
+
+input[type=password] {
+    width: 100%;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 20px;
+       margin-bottom: 25px;
+    margin-top: 25px;
+}
+
+.form-title {
+    font-size: 30px;
+    font-weight: 500;
+    text-decoration: underline;
+}
+
+input[type=submit] {
+	font-size: 18px;
+}
+
+a {
+	text-decoration: none;
+	color: #000;
+}
+
+
+hr {
+	border: none;
+	background-color: #666;
+	height: 3px;
+}
+
+body {
+	margin: 30px;
+}

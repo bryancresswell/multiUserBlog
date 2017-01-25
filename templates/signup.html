@@ -1,0 +1,30 @@
+<form method="post">
+	<label>
+		<div>Username</div>
+		<input type="text" name="username" value="{{username}}">
+		<div class="error">{{usernameError}}</div>
+	</label>
+
+	<label>
+		<div>Password</div>
+		<input type="password" name="password" value="">
+		<div class="error">{{passwordError}}</div>
+	</label>
+
+	<label>
+		<div>Verify Password</div>
+		<input type="password" name="verify" value="">
+		<div class="error">{{verifyError}}</div>
+	</label>
+
+	<label>
+		<div>Email (optional)</div>
+		<input type="text" name="email" value="{{email}}">
+		<div class="error">{{emailError}}</div>
+	</label>
+
+	<br>
+	
+	<input type="submit">
+	<div class="error">{{error}}</div>
+</form>
