@@ -101,11 +101,31 @@ textarea {
     border-width: 2px;
 }
 
+.delete-notif {
+    text-align: center;
+    font-weight: 500;
+    font-size: 30px;
+    margin-top: 30px;
+    color: red;
+}
+
+.home {
+    text-align: center;
+    font-weight: 500;
+    font-size: 30px;
+    margin-top: 30px;
+}
+
 .editing {
     text-align: center;
 }
 
 .edit-link {
+    float: left;
+    margin-left: 15px;
+}
+
+.delete-link {
     float: left;
     margin-left: 15px;
 }

@@ -285,6 +285,24 @@ class Edit(Handler):
 		else:
 			self.render("edit.html", **params)
 
+class Delete(Handler):
+	def get(self, post_id):
+		tmp = self.request.cookies.get('user_id')
+		self.uid = tmp and check_secure_val(tmp) 
+		self.user = self.uid and Users.by_id(int(self.uid))
+		self.uname = Posts.by_id(int(post_id))
+		if self.user:
+			if self.user.name == self.uname.name:
+				Posts.delete(self.uname)
+				error = "You have deleted the post"
+				self.render('delete.html', error = error)
+			else:
+				error = "You can only delete your own posts"
+				self.render('delete.html', error = error)
+		else:
+			self.redirect('/login')
+
+
 
 
 app = webapp2.WSGIApplication([('/blog', Blog), 
@@ -294,5 +312,6 @@ app = webapp2.WSGIApplication([('/blog', Blog),
 							   ('/welcome', Welcome),
 							   ('/login', Login),
 							   ('/logout', Logout),
-							   ('/blog/edit/([0-9]+)', Edit)], 
+							   ('/blog/edit/([0-9]+)', Edit),
+							   ('/blog/delete/([0-9]+)', Delete)], 
 							   debug=True)
