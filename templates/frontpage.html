@@ -15,7 +15,7 @@
 	</div>
 	{% for p in posts %}
 		<div class="title">
-			<a href="{{'/blog/%s' % (p.key().id())}}">{{p.title}}, (posted by {{p.name}})</a>
+			<a href="{{'/blog/%s' % (p.key().id())}}">{{p.title}} (posted by {{p.name}})</a>
 		</div>
 		<div class="date-created">{{p.date_time_created.strftime("%a, %d %b %Y")}}</div>
 		<hr>

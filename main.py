@@ -100,7 +100,7 @@ class Blog(Handler):
 		if self.user:
 			self.render("frontpage.html", posts = posts, name = self.user.name)
 		else:
-			self.redirect('/login')
+			self.render("frontpage.html", posts = posts)
 
 class PostedPage(Handler):
 	def get(self, post_id):
@@ -108,11 +108,10 @@ class PostedPage(Handler):
 		tmp = self.request.cookies.get('user_id')
 		self.uid = tmp and check_secure_val(tmp)
 		self.user = self.uid and Users.by_id(int(self.uid))
-		self.name = self.user.name
-		if not post:
-			self.error(404)
+		if self.user:
+			self.render("blogpost.html", post = post, name = self.user.name)
 		else:
-			self.render("blogpost.html", post = post, name = self.name)
+			self.render("blogpost.html", post = post)
 
 
 class Post(Handler):
@@ -249,6 +248,44 @@ class Logout(Handler):
 		else:
 			self.redirect('/signup')
 
+class Edit(Handler):
+	def get(self, post_id):
+		tmp = self.request.cookies.get('user_id')
+		self.uid = tmp and check_secure_val(tmp) 
+		self.user = self.uid and Users.by_id(int(self.uid))
+		self.uname = Posts.by_id(int(post_id))
+		if self.user:
+			if self.user.name == self.uname.name:
+				self.render('edit.html', name = self.user.name)
+			else:
+				self.redirect('/blog')
+		else:
+			self.render('login.html')
+
+	def post(self, post_id):
+		tmp = self.request.cookies.get('user_id')
+		self.uid = tmp and check_secure_val(tmp)
+		self.user = self.uid and Users.by_id(int(self.uid))
+		self.title = self.request.get("title")
+		self.content = self.request.get("content")
+		params = dict(name = self.user.name, title = self.title, content = self.content)
+		have_errors = False
+		if not self.title:
+			params["title_error"] = "Please add in a title"
+			have_errors = True
+		if not self.content:
+			params["content_error"] = "Please add in content"
+			have_errors = True
+		if have_errors == False:
+			blog_post = Posts.by_id(int(post_id))
+			blog_post.title = self.title
+			blog_post.content = self.content
+			blog_post.put()
+			self.redirect("/blog/%s" % str(blog_post.key().id()))
+		else:
+			self.render("edit.html", **params)
+
+
 
 app = webapp2.WSGIApplication([('/blog', Blog), 
 							   ('.*/newpost', Post), 
@@ -256,5 +293,6 @@ app = webapp2.WSGIApplication([('/blog', Blog),
 							   ('/signup', Signup),
 							   ('/welcome', Welcome),
 							   ('/login', Login),
-							   ('/logout', Logout)], 
+							   ('/logout', Logout),
+							   ('/blog/edit/([0-9]+)', Edit)], 
 							   debug=True)

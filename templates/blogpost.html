@@ -14,6 +14,9 @@
 		</div>
 	</div>
 <div class="title">{{post.title}}</div>
+<div class="edit-link">
+	<a href="{{'/blog/edit/%s' % post.key().id()}}">(Edit?)</a>
+</div>
 <div class="date-created">{{post.date_time_created.strftime("%a, %d %b %Y")}}</div>
 <hr>
 <div class="content">{{post.content}}</div>

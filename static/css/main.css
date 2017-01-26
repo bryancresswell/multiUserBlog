@@ -35,7 +35,7 @@ form {
 }
 
 .date-created {
-	font-weight: 300;
+	font-weight: 600;
 	text-align: right;
 }
 
@@ -98,6 +98,16 @@ textarea {
     margin-bottom: 25px;
     margin-top: 25px;
     border-style: solid;
+    border-width: 2px;
+}
+
+.editing {
+    text-align: center;
+}
+
+.edit-link {
+    float: left;
+    margin-left: 15px;
 }
 
 .signup-submit {
@@ -143,6 +153,7 @@ a.button {
     padding: 10px;
     text-decoration: none;
     color: initial;
+    border-style: solid;
 }
 
 .signup-link {
