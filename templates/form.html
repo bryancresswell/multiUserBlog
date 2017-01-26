@@ -1,6 +1,18 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<div class="logged-in">You're logged in as: {{name}}</div>
+<div class="row">
+	<div class="col-4">
+		<a href="/blog" class="button">View blog</a>
+	</div>
+	<div class="col-4">
+		<a href="/newpost" class="button">Post</a>
+	</div>
+	<div class="col-4">
+		<a href="/logout" class="button">Logout</a>
+	</div>
+</div>
 <form method="post">
 	<label>
 		<div class="form-title">title</div>

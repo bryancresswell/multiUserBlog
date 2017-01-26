@@ -77,32 +77,61 @@ class Handler(webapp2.RequestHandler):
 
 
 class Posts(db.Model):
+	name = db.StringProperty(required = True)
 	title = db.StringProperty(required = True)
 	content = db.TextProperty(required = True)
 	date_time_created = db.DateTimeProperty(auto_now_add = True)
 
+	@classmethod
+	def by_name(cls, name):
+		u = Posts.all().filter('name = ', name).get()
+		return u
+
+	@classmethod
+	def by_id(cls, uid):
+		return Posts.get_by_id(uid)
+
 class Blog(Handler):
 	def get(self):
+		tmp = self.request.cookies.get('user_id')
+		self.uid = tmp and check_secure_val(tmp)
+		self.user = self.uid and Users.by_id(int(self.uid))
 		posts = db.GqlQuery("select * from Posts order by date_time_created desc")
-		self.render("frontpage.html", posts = posts)
+		if self.user:
+			self.render("frontpage.html", posts = posts, name = self.user.name)
+		else:
+			self.redirect('/login')
 
 class PostedPage(Handler):
 	def get(self, post_id):
 		post = Posts.get_by_id(int(post_id))
+		tmp = self.request.cookies.get('user_id')
+		self.uid = tmp and check_secure_val(tmp)
+		self.user = self.uid and Users.by_id(int(self.uid))
+		self.name = self.user.name
 		if not post:
 			self.error(404)
 		else:
-			self.render("blogpost.html", post = post)
+			self.render("blogpost.html", post = post, name = self.name)
 
 
 class Post(Handler):
 	def get(self):
-		self.render("form.html")
+		tmp = self.request.cookies.get('user_id')
+		self.uid = tmp and check_secure_val(tmp)
+		self.user = self.uid and Users.by_id(int(self.uid))
+		if self.user:
+			self.render("form.html", name = self.user.name)
+		else:
+			self.redirect('/login')
 
 	def post(self):
+		tmp = self.request.cookies.get('user_id')
+		self.uid = tmp and check_secure_val(tmp)
+		self.user = self.uid and Users.by_id(int(self.uid))
 		self.title = self.request.get("title")
 		self.content = self.request.get("content")
-		params = dict(title = self.title, content = self.content)
+		params = dict(name = self.user.name, title = self.title, content = self.content)
 		have_errors = False
 		if not self.title:
 			params["title_error"] = "Please add in a title"
@@ -111,7 +140,7 @@ class Post(Handler):
 			params["content_error"] = "Please add in content"
 			have_errors = True
 		if have_errors == False:
-			blog_post = Posts(title = self.title, content = self.content)
+			blog_post = Posts(name = self.user.name, title = self.title, content = self.content)
 			blog_post.put()
 			self.redirect("/blog/%s" % str(blog_post.key().id()))
 		else:
@@ -186,7 +215,13 @@ class Welcome(Handler):
 
 class Login(Handler):
 	def get(self):
-		self.render('login.html')
+		tmp = self.request.cookies.get('user_id')
+		self.uid = tmp and check_secure_val(tmp) 
+		self.user = self.uid and Users.by_id(int(self.uid))
+		if self.user:
+			self.redirect('/blog')
+		else:
+			self.render('login.html')
 
 	def post(self):
 		self.username = self.request.get('username')
@@ -203,14 +238,17 @@ class Login(Handler):
 			error = "Invalid Login"
 			self.render("login.html", error = error)
 
-
-
-
-
 class Logout(Handler):
 	def get(self):
-		self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
-		self.redirect('/signup')
+		tmp = self.request.cookies.get('user_id')
+		self.uid = tmp and check_secure_val(tmp) 
+		self.user = self.uid and Users.by_id(int(self.uid))
+		if self.user:
+			self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
+			self.redirect('/login')
+		else:
+			self.redirect('/signup')
+
 
 app = webapp2.WSGIApplication([('/blog', Blog), 
 							   ('.*/newpost', Post), 

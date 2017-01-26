@@ -1,1 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
 <h1>Welcome, {{username}}</h1>
+<h2>Choose an option</h2>
+<div class="row">
+	<div class="col-4">
+		<a href="/blog" class="button">View blog</a>
+	</div>
+	<div class="col-4">
+		<a href="/newpost" class="button">Post</a>
+	</div>
+	<div class="col-4">
+		<a href="/logout" class="button">Logout</a>
+	</div>
+</div>
+{% endblock %}
