@@ -20,6 +20,7 @@ import hmac
 import string
 import random
 import hashlib
+import time
 
 from google.appengine.ext import db
 
@@ -104,14 +105,15 @@ class Blog(Handler):
 
 class PostedPage(Handler):
 	def get(self, post_id):
+		cursor_db = db.GqlQuery("select * from Comments where post_id = %i order by date_time_created desc" % int(post_id))
 		post = Posts.get_by_id(int(post_id))
 		tmp = self.request.cookies.get('user_id')
 		self.uid = tmp and check_secure_val(tmp)
 		self.user = self.uid and Users.by_id(int(self.uid))
 		if self.user:
-			self.render("blogpost.html", post = post, name = self.user.name)
+			self.render("blogpost.html", post = post, name = self.user.name, comments = cursor_db)
 		else:
-			self.render("blogpost.html", post = post)
+			self.render("blogpost.html", post = post, comments = cursor_db)
 
 
 class Post(Handler):
@@ -230,8 +232,8 @@ class Login(Handler):
 													 self.password, 
 													 Users.by_name(self.username).password_hashed):
 			self.response.headers.add_header('Set-Cookie', '%s=%s; Path=/'
-											 % ('user_id', 
-											 	make_secure_val(str(Users.by_name(self.username).key().id()))))
+											 % 
+											 ('user_id',make_secure_val(str(Users.by_name(self.username).key().id()))))
 			self.redirect('/welcome')
 		else:
 			error = "Invalid Login"
@@ -302,8 +304,106 @@ class Delete(Handler):
 		else:
 			self.redirect('/login')
 
+class Comments(db.Model):
+	post_author = db.StringProperty(required = True)
+	name = db.StringProperty(required = True)
+	content = db.TextProperty(required = True)
+	post_id = db.IntegerProperty(required = True)
+	date_time_created = db.DateTimeProperty(auto_now_add = True)
+
+	@classmethod
+	def by_name(cls, name):
+		u = Comments.all().filter('name = ', name).get()
+		return u
+
+	@classmethod
+	def by_id(cls, uid):
+		return Comments.get_by_id(uid)
+
+class Comment(Handler):
+	def get(self, post_id):
+		tmp = self.request.cookies.get('user_id')
+		self.uid = tmp and check_secure_val(tmp)
+		self.user = self.uid and Users.by_id(int(self.uid))
+		if self.user:
+			self.render("comment.html", name = self.user.name)
+		else:
+			self.redirect('/login')
+
+	def post(self, post_id):
+		tmp = self.request.cookies.get('user_id')
+		self.uid = tmp and check_secure_val(tmp)
+		self.user = self.uid and Users.by_id(int(self.uid))
+		self.content = self.request.get("content")
+		params = dict(name = self.user.name, content = self.content)
+		have_errors = False
+		if not self.content:
+			params["content_error"] = "Please add in content"
+			have_errors = True
+		if have_errors == False:
+			blog_post_comment = Comments(post_author = Posts.by_id(int(post_id)).name, 
+										 post_id = int(post_id), 
+										 name = self.user.name, 
+										 content = self.content)
+			blog_post_comment.put()
+			self.redirect("/blog/%s" % str(post_id))
+		else:
+			self.render("comment.html", **params)
+
+class DeleteComments(Handler):
+	def get(self, comment_id):
+		tmp = self.request.cookies.get('user_id')
+		self.uid = tmp and check_secure_val(tmp) 
+		self.user = self.uid and Users.by_id(int(self.uid))
+		self.commentsPost = Comments.by_id(int(comment_id))
+		if self.user:
+			if self.user.name == self.commentsPost.name:
+				Comments.delete(self.commentsPost)
+				error = "You have deleted the comment"
+				self.render('delete.html', error = error)
+			else:
+				error = "You can only delete your own comments"
+				self.render('delete.html', error = error)
+		else:
+			self.redirect('/login')
+
+class EditComments(Handler):
+	def get(self, comment_id):
+		tmp = self.request.cookies.get('user_id')
+		self.uid = tmp and check_secure_val(tmp) 
+		self.user = self.uid and Users.by_id(int(self.uid))
+		self.commentsPost = Comments.by_id(int(comment_id))
+		if self.user:
+			if self.user.name == self.commentsPost.name:
+				self.render('editcomments.html', name = self.user.name)
+			else:
+				self.redirect('/blog')
+		else:
+			self.render('login.html')
+
+	def post(self, comment_id):
+		tmp = self.request.cookies.get('user_id')
+		self.uid = tmp and check_secure_val(tmp)
+		self.user = self.uid and Users.by_id(int(self.uid))
+		self.content = self.request.get("content")
+		params = dict(name = self.user.name, content = self.content)
+		have_errors = False
+		if not self.content:
+			params["content_error"] = "Please add in content"
+			have_errors = True
+		if have_errors == False:
+			blog_post_comment = Comments.by_id(int(comment_id))
+			blog_post_comment.content = self.content
+			blog_post_comment.put()
+			self.redirect("/blog")
+		else:
+			self.render("editcomments.html", **params)
 
 
+			#only can edit and delete comments they hav made...
+			#say im user 123, i log in and i delete my comment
+			#so i need to find via comment id and then check if same username and then remove
+			#edit is find via comment id, check if same username then update
 
 app = webapp2.WSGIApplication([('/blog', Blog), 
 							   ('.*/newpost', Post), 
@@ -313,5 +413,8 @@ app = webapp2.WSGIApplication([('/blog', Blog),
 							   ('/login', Login),
 							   ('/logout', Logout),
 							   ('/blog/edit/([0-9]+)', Edit),
-							   ('/blog/delete/([0-9]+)', Delete)], 
+							   ('/blog/delete/([0-9]+)', Delete),
+							   ('/blog/comment/([0-9]+)', Comment),
+							   ('/blog/deletecomments/([0-9]+)', DeleteComments),
+							   ('/blog/editcomments/([0-9]+)', EditComments)], 
 							   debug=True)

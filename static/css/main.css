@@ -7,6 +7,35 @@
 	float: left;
 }
 
+.comments {
+    float: left;
+    font-weight: 600;
+}
+
+.comments-date-created {
+    font-weight: 600;
+    text-align: right;
+    margin-bottom: 10px;
+}
+
+.comment-link {
+    text-align: right;
+}
+
+.comment-content {
+    font-weight: 600;
+}
+
+.content-comments {
+    margin-left: 30px;
+    float: left;
+}
+
+.posted-by {
+    float: left;
+    font-weight: 600;
+}
+
 form {
     width: 300px;
     margin: 0 auto;

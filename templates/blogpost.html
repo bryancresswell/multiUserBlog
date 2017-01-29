@@ -23,5 +23,23 @@
 <div class="date-created">{{post.date_time_created.strftime("%a, %d %b %Y")}}</div>
 <hr>
 <div class="content">{{post.content}}</div>
+<br>
+<br>
+<div class="comments">Comments</div>
+<div class="comment-link">
+	<a href="{{'/blog/comment/%s' % post.key().id()}}">(Comment?)</a>
+</div>
+<hr>
+{% for c in comments %}
+	<div class="posted-by">{{c.name}}:</div>
+	<div class="content-comments">{{c.content}}</div>
+	<div class="edit-link">
+		<a href="{{'/blog/editcomments/%s' % c.key().id()}}">(Edit?)</a>
+	</div>
+	<div class="delete-link">
+		<a href="{{'/blog/deletecomments/%s' % c.key().id()}}">(Delete?)</a>
+	</div>
+	<div class="comments-date-created">{{c.date_time_created.strftime("%a, %d %b %Y")}}</div>
+{% endfor %}
 
 {% endblock %}
