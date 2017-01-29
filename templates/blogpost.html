@@ -20,6 +20,10 @@
 <div class="delete-link">
 	<a href="{{'/blog/delete/%s' % post.key().id()}}">(Delete?)</a>
 </div>
+<div class="likes">Likes: {{post.likes|length}}</div>
+<div class="likes-link">
+	<a href="{{'/blog/like/%s' % post.key().id()}}">(Like?)</a>
+</div>
 <div class="date-created">{{post.date_time_created.strftime("%a, %d %b %Y")}}</div>
 <hr>
 <div class="content">{{post.content}}</div>

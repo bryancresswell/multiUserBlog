@@ -18,6 +18,16 @@
     margin-bottom: 10px;
 }
 
+.likes {
+    float: left;
+    margin-left: 30px;
+}
+
+.likes-link {
+    float: left;
+    margin-left: 30px;
+}
+
 .comment-link {
     text-align: right;
 }

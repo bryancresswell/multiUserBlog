@@ -81,6 +81,7 @@ class Posts(db.Model):
 	name = db.StringProperty(required = True)
 	title = db.StringProperty(required = True)
 	content = db.TextProperty(required = True)
+	likes = db.ListProperty(str, required = True)
 	date_time_created = db.DateTimeProperty(auto_now_add = True)
 
 	@classmethod
@@ -130,6 +131,7 @@ class Post(Handler):
 		tmp = self.request.cookies.get('user_id')
 		self.uid = tmp and check_secure_val(tmp)
 		self.user = self.uid and Users.by_id(int(self.uid))
+		self.likes = []
 		self.title = self.request.get("title")
 		self.content = self.request.get("content")
 		params = dict(name = self.user.name, title = self.title, content = self.content)
@@ -141,7 +143,7 @@ class Post(Handler):
 			params["content_error"] = "Please add in content"
 			have_errors = True
 		if have_errors == False:
-			blog_post = Posts(name = self.user.name, title = self.title, content = self.content)
+			blog_post = Posts(name = self.user.name, title = self.title, content = self.content, likes = len(self.likes))
 			blog_post.put()
 			self.redirect("/blog/%s" % str(blog_post.key().id()))
 		else:
@@ -297,10 +299,10 @@ class Delete(Handler):
 			if self.user.name == self.uname.name:
 				Posts.delete(self.uname)
 				error = "You have deleted the post"
-				self.render('delete.html', error = error)
+				self.render('notification.html', error = error)
 			else:
 				error = "You can only delete your own posts"
-				self.render('delete.html', error = error)
+				self.render('notification.html', error = error)
 		else:
 			self.redirect('/login')
 
@@ -346,7 +348,8 @@ class Comment(Handler):
 										 name = self.user.name, 
 										 content = self.content)
 			blog_post_comment.put()
-			self.redirect("/blog/%s" % str(post_id))
+			error = "You have posted your comment"
+			self.render("notification.html", error = error)
 		else:
 			self.render("comment.html", **params)
 
@@ -360,10 +363,10 @@ class DeleteComments(Handler):
 			if self.user.name == self.commentsPost.name:
 				Comments.delete(self.commentsPost)
 				error = "You have deleted the comment"
-				self.render('delete.html', error = error)
+				self.render('notification.html', error = error)
 			else:
 				error = "You can only delete your own comments"
-				self.render('delete.html', error = error)
+				self.render('notification.html', error = error)
 		else:
 			self.redirect('/login')
 
@@ -377,7 +380,8 @@ class EditComments(Handler):
 			if self.user.name == self.commentsPost.name:
 				self.render('editcomments.html', name = self.user.name)
 			else:
-				self.redirect('/blog')
+				error = "You can only edit your own comment"
+				self.render('notification.html', error = error)
 		else:
 			self.render('login.html')
 
@@ -399,6 +403,26 @@ class EditComments(Handler):
 		else:
 			self.render("editcomments.html", **params)
 
+class LikePosts(Handler):
+	def get(self, post_id):
+		tmp = self.request.cookies.get('user_id')
+		self.uid = tmp and check_secure_val(tmp)
+		self.user = self.uid and Users.by_id(int(self.uid))
+		self.postName = Posts.by_id(int(post_id))
+		self.likedList = self.postName.likes
+		if self.user.name != self.postName.name and self.user.name not in self.likedList:
+			self.postName.likes.append(self.user.name)
+			self.postName.put()
+			error = "Thanks for liking!"
+			self.render("notification.html", error = error)
+		elif self.user.name in self.likedList:
+			error = "You can only like posts once"
+			self.render("notification.html", error = error)
+		elif self.user.name == self.postName.name:
+			error = "You can't like your own posts"
+			self.render("notification.html", error = error)
+		else:
+			self.redirect('/login')
 
 			#only can edit and delete comments they hav made...
 			#say im user 123, i log in and i delete my comment
@@ -416,5 +440,6 @@ app = webapp2.WSGIApplication([('/blog', Blog),
 							   ('/blog/delete/([0-9]+)', Delete),
 							   ('/blog/comment/([0-9]+)', Comment),
 							   ('/blog/deletecomments/([0-9]+)', DeleteComments),
-							   ('/blog/editcomments/([0-9]+)', EditComments)], 
+							   ('/blog/editcomments/([0-9]+)', EditComments),
+							   ('/blog/like/([0-9]+)', LikePosts)], 
 							   debug=True)
