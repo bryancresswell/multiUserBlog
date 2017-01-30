@@ -360,7 +360,7 @@ class Edit(Handler):
         self.content = self.request.get("content")
         self.uname = Posts.by_id(int(post_id))
         if self.user:
-            if self.user.name == self.uname.name:
+            if self.uname and (self.user.name == self.uname.name):
                 params = dict(name=self.user.name,
                               title=self.title, content=self.content)
                 have_errors = False
@@ -378,6 +378,9 @@ class Edit(Handler):
                     self.redirect("/blog/%s" % str(blog_post.key().id()))
                 else:
                     self.render("edit.html", **params)
+            else:
+            	error = "This post doesn't exist"
+            	self.render("notification.html", error = error)
         else:
             self.redirect('/login')
 
@@ -388,13 +391,16 @@ class Delete(Handler):
         self.user = self.validate()
         self.uname = Posts.by_id(int(post_id))
         if self.user:
-            if self.user.name == self.uname.name:
+            if self.uname and (self.user.name == self.uname.name):
                 Posts.delete(self.uname)
                 error = "You have deleted the post"
                 self.render('notification.html', error=error)
-            else:
-                error = "You can only delete your own posts"
+            elif not self.uname:
+                error = "This post doesn't exist"
                 self.render('notification.html', error=error)
+            else:
+            	error = "You can only delete your own posts"
+            	self.render('notification.html', error=error)
         else:
             self.redirect('/login')
 
@@ -403,8 +409,12 @@ class Comment(Handler):
 
     def get(self, post_id):
         self.user = self.validate()
-        if self.user:
+        self.uname = Posts.by_id(int(post_id))
+        if self.user and self.uname:
             self.render("comment.html", name=self.user.name)
+        elif not self.uname:
+        	error = "This post doesn't exist"
+        	self.render("notification.html", error=error)
         else:
             self.redirect('/login')
 
