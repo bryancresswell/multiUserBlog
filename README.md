@@ -1,4 +1,4 @@
-# Project Portfolio
+# Multi User Blog
 
 Full Stack Nanodegree Program Project 3. Tasked with creating a multi-user blog based on the project guidelines. I used the Jinja2 templating language, as well as Python 2.7 and the Google App Engine which helps with the overall logic, database and appearance of the page.
 
