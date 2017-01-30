@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+{% if name %}
 	<div class="logged-in">You're logged in as: {{name}}</div>
 	<div class="row">
 		<div class="col-4">
@@ -13,6 +14,20 @@
 			<a href="/logout" class="button">Logout</a>
 		</div>
 	</div>
+{% else %}
+	<div class="logged-in">You're not logged in.</div>
+	<div class="row">
+		<div class="col-4">
+			<a href="/blog" class="button">View blog</a>
+		</div>
+		<div class="col-4">
+			<a href="/signup" class="button">Signup</a>
+		</div>
+		<div class="col-4">
+			<a href="/login" class="button">Login</a>
+		</div>
+	</div>
+{% endif %}
 	{% for p in posts %}
 		<div class="title">
 			<a href="{{'/blog/%s' % (p.key().id())}}">{{p.title}} (posted by {{p.name}})</a>
